@@ -1,0 +1,31 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # Esegue ogni 3 giorni alle 04:00 UTC
+    - cron: '0 4 */3 * *'
+  workflow_dispatch: # Permette di testare o avviare il workflow manualmente da GitHub
+
+jobs:
+  ping-database:
+    name: Ping Supabase Database
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Installa dipendenze minime per il ping
+        run: npm install pg dotenv --no-save
+
+      - name: Esegui Ping su Supabase
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: node backend/scripts/keepAlive.js
